@@ -1,0 +1,78 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  password    String
+  firstName   String    
+  lastName    String
+  token       String?
+  roleId      String
+  isActive    Boolean  @default(false)
+  gdpr        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cart        Cart?
+  role        Role     @relation(fields: [roleId], references: [id])
+}
+
+model Cart {
+  id          String   @id @default(uuid())
+  usersId     String   @unique
+
+
+user          Users    @relation(fields: [usersId], references: [id])
+cartHasProduct CartHasProducts[]
+}
+
+model CartHasProducts {
+  id          String    @id @default(uuid())
+  quantity    Int 
+  cartId      String
+  productsId  String
+
+
+  cart       Cart      @relation(fields: [cartId], references: [id])
+  products   Products  @relation(fields: [productsId],references: [id])
+}
+
+
+model Products {
+  id          String    @id @default(uuid())
+  name        String    
+  height      Float
+  weight      Float
+  price       Float
+  quantity    Int
+  image       String
+  categoryId  String
+
+
+  cartHasProducts CartHasProducts[]
+  category    Category  @relation(fields: [categoryId], references: [id])
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+
+  products    Products[]
+}
+
+model Role {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        Users[]
+}
